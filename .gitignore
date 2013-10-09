@@ -1,0 +1,8 @@
+/.git
+/.gradle
+/.settings
+/build
+/.classpath
+/.project
+/target
+/bpaulin.properties

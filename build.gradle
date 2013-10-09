@@ -1,0 +1,161 @@
+apply plugin: 'war'
+apply plugin: 'jetty'
+apply plugin: 'cargo'
+apply plugin: 'maven'
+apply plugin: 'grails'
+apply plugin: 'release'
+
+
+//Initialization
+sourceCompatibility = 1.6
+def artifactId = project.name
+def artifactDownloadPath = "target/" + artifactId + ".war"
+def userName = System.getProperty("user.name")
+def gradlePropsFile = project.file(userName + ".properties")
+
+//If user properties don't exist create it based on template.
+if(!gradlePropsFile.exists())
+{
+	def templateFile = file("userTemplate.properties")
+	ant.copy(file:templateFile.getAbsolutePath(), toFile: gradlePropsFile.getAbsolutePath() )
+}
+def userProperties = new Properties()
+def gradleFileReader = new FileReader(gradlePropsFile)
+userProperties.load(gradleFileReader)
+gradleFileReader.close()
+
+//Load user properties
+for(currentUserProperty in userProperties.stringPropertyNames())
+{
+	project.ext.set(currentUserProperty, userProperties.getProperty(currentUserProperty))
+}
+
+//Configurations
+buildscript {
+	repositories {
+		mavenCentral()
+		maven{ url "http://repo.grails.org/grails/core/" }
+		maven { url "https://oss.sonatype.org/content/groups/public"}
+	}
+
+	dependencies {
+		classpath "org.gradle.api.plugins:gradle-cargo-plugin:0.6.1",
+					"org.grails:grails-gradle-plugin:2.0.0-SNAPSHOT",
+					"org.grails:grails-bootstrap:2.0.0",
+					"com.github.townsfolk:gradle-release:1.2"
+	}
+}
+
+cargo {
+	containerId = 'tomcat7x'
+	port = Integer.parseInt("$deployPort")
+
+	deployable {
+		context = artifactId
+		file = project.file(artifactDownloadPath)
+	}
+	
+	remote {
+		hostname = "$deployHostname"
+		username = "$deployUserName"
+		password = "$deployPassword"
+	}
+	
+}
+
+repositories {
+	mavenRepo url: "$repositoryContextUrl/libs-releases";
+	mavenCentral()
+	maven{url "http://repo.grails.org/grails/core/"}
+}
+
+grails{
+	grailsVersion="2.2.2"
+}
+
+dependencies {
+	def cargoVersion = '1.3.3'
+	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
+		  "org.codehaus.cargo:cargo-ant:$cargoVersion"
+}
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			pom.artifactId = artifactId
+			repository(url: "$repositoryContextUrl/libs-release-local" ){
+				authentication(userName: "$repositoryUser", password: "$repositoryPassword")
+			}
+			
+		}
+	}
+}
+
+war{
+	enabled = false
+	archiveName = artifactId + ".war"
+	destinationDir = file("target")
+}
+
+classes{
+	enabled = false
+}
+processResources{
+	enabled = false
+}
+compileJava{
+	enabled = false
+}
+task downloadWar << {
+	
+	def groupPath = project.group.replace(".", "/")
+	def defaultVersion = project.version + ".$userName.$buildNumber"
+	def versionPath
+	def versionMessage = "Enter Version: [$defaultVersion]"
+	if(System.console())
+	{
+		versionPath = System.console().readLine(versionMessage) ?: defaultVersion
+	}
+	else
+	{
+		println versionMessage
+		versionPath = System.in.newReader().readLine() ?: defaultVersion
+	}
+	
+	def artifactNamePath = artifactId + "-" + versionPath + ".war"
+	
+	def downloadUrl = "$repositoryContextUrl/libs-release-local/$groupPath/$artifactId/$versionPath/$artifactNamePath"
+	
+	def targetDir = new File('target')
+	
+	if(!targetDir.isDirectory())
+	{
+		targetDir.mkdirs()
+	}
+	
+	ant.get(src: downloadUrl, dest: artifactDownloadPath)
+	
+}
+
+task updateBuildNumber << {
+	
+	def buildNum = Integer.parseInt(project.ext.get("buildNumber"))
+	buildNum++
+	userProperties.setProperty("buildNumber", buildNum.toString())
+	def gradleFileWriter = new FileWriter(gradlePropsFile)
+	userProperties.store(gradleFileWriter, "")
+	gradleFileWriter.flush()
+	gradleFileWriter.close()
+}
+
+task updateUploadedPom << {
+	def pomVersion = project.version
+	if(!project.getGradle().getTaskGraph().hasTask(":createReleaseTag"))
+		pomVersion += ".$userName.$buildNumber"
+	uploadArchives.repositories.mavenDeployer.pom.version = pomVersion
+}
+
+//Task Dependencies
+updateUploadedPom.dependsOn updateBuildNumber
+createReleaseTag.dependsOn uploadArchives
+uploadArchives.dependsOn updateUploadedPom
