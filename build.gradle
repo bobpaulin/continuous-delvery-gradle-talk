@@ -1,3 +1,5 @@
+import org.ajoberstar.gradle.git.tasks.*
+
 apply plugin: 'war'
 apply plugin: 'jetty'
 apply plugin: 'cargo'
@@ -11,18 +13,20 @@ sourceCompatibility = 1.6
 def artifactId = project.name
 def artifactDownloadPath = "target/" + artifactId + ".war"
 def userName = System.getProperty("user.name")
-def gradlePropsFile = project.file(userName + ".properties")
+def userPropsFile = project.file(userName + ".properties")
+def gradlePropsFile = project.file("gradle.properties")
+def branchName = "";
 
 //If user properties don't exist create it based on template.
-if(!gradlePropsFile.exists())
+if(!userPropsFile.exists())
 {
 	def templateFile = file("userTemplate.properties")
-	ant.copy(file:templateFile.getAbsolutePath(), toFile: gradlePropsFile.getAbsolutePath() )
+	ant.copy(file:templateFile.getAbsolutePath(), toFile: userPropsFile.getAbsolutePath() )
 }
 def userProperties = new Properties()
-def gradleFileReader = new FileReader(gradlePropsFile)
-userProperties.load(gradleFileReader)
-gradleFileReader.close()
+def userFileReader = new FileReader(userPropsFile)
+userProperties.load(userFileReader)
+userFileReader.close()
 
 //Load user properties
 for(currentUserProperty in userProperties.stringPropertyNames())
@@ -42,7 +46,8 @@ buildscript {
 		classpath "org.gradle.api.plugins:gradle-cargo-plugin:0.6.1",
 					"org.grails:grails-gradle-plugin:2.0.0-SNAPSHOT",
 					"org.grails:grails-bootstrap:2.0.0",
-					"com.github.townsfolk:gradle-release:1.2"
+					"com.github.townsfolk:gradle-release:1.2",
+					"org.ajoberstar:gradle-git:0.6.3"
 	}
 }
 
@@ -109,7 +114,7 @@ compileJava{
 task downloadWar << {
 	
 	def groupPath = project.group.replace(".", "/")
-	def defaultVersion = project.version + ".$userName.$buildNumber"
+	def defaultVersion = project.version + ".$branchName.$buildNumber"
 	def versionPath
 	def versionMessage = "Enter Version: [$defaultVersion]"
 	if(System.console())
@@ -142,17 +147,67 @@ task updateBuildNumber << {
 	def buildNum = Integer.parseInt(project.ext.get("buildNumber"))
 	buildNum++
 	userProperties.setProperty("buildNumber", buildNum.toString())
-	def gradleFileWriter = new FileWriter(gradlePropsFile)
-	userProperties.store(gradleFileWriter, "")
-	gradleFileWriter.flush()
-	gradleFileWriter.close()
+	def userFileWriter = new FileWriter(userPropsFile)
+	userProperties.store(userFileWriter, "")
+	userFileWriter.flush()
+	userFileWriter.close()
 }
 
 task updateUploadedPom << {
 	def pomVersion = project.version
-	if(!project.getGradle().getTaskGraph().hasTask(":createReleaseTag"))
-		pomVersion += ".$userName.$buildNumber"
+	if(!project.getGradle().getTaskGraph().hasTask(":customRelease"))
+		pomVersion += ".$branchName.$buildNumber"
 	uploadArchives.repositories.mavenDeployer.pom.version = pomVersion
+}
+
+task updateVersionNumber << {
+	def oldVersion = "${project.version}"
+	
+	def versionPath
+	
+	def oldVersionArray = oldVersion.split("\\.")
+	def majorVersion = oldVersionArray[0]
+	def minorVersion = oldVersionArray[1]
+	def patchVersion = Integer.parseInt(oldVersionArray[2]) + 1
+	def defaultVersion =  "$majorVersion.$minorVersion.$patchVersion"
+	
+	def versionMessage = "Enter Version: [$defaultVersion]"
+	if(System.console())
+	{
+		versionPath = System.console().readLine(versionMessage) ?: defaultVersion
+	}
+	else
+	{
+		println versionMessage
+		versionPath = System.in.newReader().readLine() ?: defaultVersion
+	}
+	
+	def propFile = gradlePropsFile;
+	
+	try {
+		project.ant.replace(file: propFile, token: "version=${oldVersion}", value: "version=${versionPath}", failOnNoReplacements: true)
+	} catch (org.apache.tools.ant.BuildException be) {
+		throw new GradleException("Unable to update version property.")
+	}
+	
+}
+
+task getBranchName(type: GitBranchList) << {
+	branchName = getWorkingBranch().name
+	print branchName
+}
+
+task tag(type: GitTag) {
+	tagName = version
+	message = "Release of ${version}"
+}
+
+task commitVersionUpdate(type: GitCommit) {
+	message = "Version Number ${version}"
+}
+
+task customRelease {
+	dependsOn tag, updateUploadedPom, uploadArchives, updateVersionNumber, commitVersionUpdate
 }
 
 //Task Dependencies
