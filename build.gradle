@@ -211,6 +211,6 @@ task customRelease {
 }
 
 //Task Dependencies
-updateUploadedPom.dependsOn updateBuildNumber
+//updateUploadedPom.dependsOn updateBuildNumber
 createReleaseTag.dependsOn uploadArchives
-uploadArchives.dependsOn updateUploadedPom
+//uploadArchives.dependsOn updateUploadedPom
