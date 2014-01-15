@@ -214,3 +214,8 @@ task customRelease {
 //updateUploadedPom.dependsOn updateBuildNumber
 createReleaseTag.dependsOn uploadArchives
 //uploadArchives.dependsOn updateUploadedPom
+
+updateUploadedPom.mustRunAfter tag
+uploadArchives.mustRunAfter updateUploadedPom
+updateVersionNumber.mustRunAfter uploadArchives
+commitVersionUpdate.mustRunAfter updateVersionNumber
