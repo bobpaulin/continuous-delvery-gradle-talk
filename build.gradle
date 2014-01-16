@@ -155,7 +155,7 @@ task downloadWar << {
 task updateUploadedPom << {
 	def pomVersion = project.version
 	if(!project.getGradle().getTaskGraph().hasTask(":release"))
-		pomVersion += ".$branchName.$buildNumber"
+		pomVersion += ".$branchName"
 	uploadArchives.repositories.mavenDeployer.pom.version = pomVersion
 }
 
