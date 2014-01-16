@@ -121,6 +121,10 @@ compileJava{
 
 
 //Custom Tasks
+task cleanTarget(type: Delete) {
+	delete fileTree(dir: "target")
+}
+
 task downloadWar << {
 	
 	def groupPath = project.group.replace(".", "/")
@@ -210,14 +214,15 @@ task commitVersionUpdate(type: GitCommit) {
 }
 
 task qaRelease {
-	dependsOn updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate
+	dependsOn getBranchName, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate
 }
 
 task release {
-	dependsOn tag, qaRelease
+	dependsOn tag, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate
 }
 
 //Task Dependencies
+updateUploadedPom.mustRunAfter getBranchName
 updateUploadedPom.mustRunAfter tag
 uploadArchives.mustRunAfter updateUploadedPom
 updateVersionNumber.mustRunAfter uploadArchives
