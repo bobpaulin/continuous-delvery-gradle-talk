@@ -5,16 +5,17 @@ apply plugin: 'jetty'
 apply plugin: 'cargo'
 apply plugin: 'maven'
 apply plugin: 'grails'
-apply plugin: 'release'
 
 
 //Initialization
 sourceCompatibility = 1.6
 def artifactId = project.name
 def artifactDownloadPath = "target/" + artifactId + ".war"
+def artifactUploadPath = file('target/' +artifactId + '-' + project.version + '.war')
 def userName = System.getProperty("user.name")
 def userPropsFile = project.file(userName + ".properties")
 def gradlePropsFile = project.file("gradle.properties")
+def grailsPropsFile = project.file("application.properties")
 def branchName = "";
 
 //If user properties don't exist create it based on template.
@@ -46,7 +47,6 @@ buildscript {
 		classpath "org.gradle.api.plugins:gradle-cargo-plugin:0.6.1",
 					"org.grails:grails-gradle-plugin:2.0.0-SNAPSHOT",
 					"org.grails:grails-bootstrap:2.0.0",
-					"com.github.townsfolk:gradle-release:1.2",
 					"org.ajoberstar:gradle-git:0.6.3"
 	}
 }
@@ -84,6 +84,10 @@ dependencies {
 		  "org.codehaus.cargo:cargo-ant:$cargoVersion"
 }
 
+artifacts {
+	archives artifactUploadPath
+}
+
 uploadArchives {
 	repositories {
 		mavenDeployer {
@@ -102,19 +106,25 @@ war{
 	destinationDir = file("target")
 }
 
+//Disable these tasks for Grails
 classes{
 	enabled = false
 }
+
 processResources{
 	enabled = false
 }
+
 compileJava{
 	enabled = false
 }
+
+
+//Custom Tasks
 task downloadWar << {
 	
 	def groupPath = project.group.replace(".", "/")
-	def defaultVersion = project.version + ".$branchName.$buildNumber"
+	def defaultVersion = project.version + ".$branchName"
 	def versionPath
 	def versionMessage = "Enter Version: [$defaultVersion]"
 	if(System.console())
@@ -142,20 +152,9 @@ task downloadWar << {
 	
 }
 
-task updateBuildNumber << {
-	
-	def buildNum = Integer.parseInt(project.ext.get("buildNumber"))
-	buildNum++
-	userProperties.setProperty("buildNumber", buildNum.toString())
-	def userFileWriter = new FileWriter(userPropsFile)
-	userProperties.store(userFileWriter, "")
-	userFileWriter.flush()
-	userFileWriter.close()
-}
-
 task updateUploadedPom << {
 	def pomVersion = project.version
-	if(!project.getGradle().getTaskGraph().hasTask(":customRelease"))
+	if(!project.getGradle().getTaskGraph().hasTask(":release"))
 		pomVersion += ".$branchName.$buildNumber"
 	uploadArchives.repositories.mavenDeployer.pom.version = pomVersion
 }
@@ -164,7 +163,7 @@ task updateVersionNumber << {
 	def oldVersion = "${project.version}"
 	
 	def versionPath
-	
+	//Increment Version Number
 	def oldVersionArray = oldVersion.split("\\.")
 	def majorVersion = oldVersionArray[0]
 	def minorVersion = oldVersionArray[1]
@@ -182,10 +181,10 @@ task updateVersionNumber << {
 		versionPath = System.in.newReader().readLine() ?: defaultVersion
 	}
 	
-	def propFile = gradlePropsFile;
 	
 	try {
-		project.ant.replace(file: propFile, token: "version=${oldVersion}", value: "version=${versionPath}", failOnNoReplacements: true)
+		project.ant.replace(file: gradlePropsFile, token: "version=${oldVersion}", value: "version=${versionPath}", failOnNoReplacements: true)
+		project.ant.replace(file: grailsPropsFile, token: "app.version=${oldVersion}", value: "app.version=${versionPath}", failOnNoReplacements: true)
 	} catch (org.apache.tools.ant.BuildException be) {
 		throw new GradleException("Unable to update version property.")
 	}
@@ -202,20 +201,25 @@ task tag(type: GitTag) {
 	message = "Release of ${version}"
 }
 
+task addVersionUpdate(type: GitAdd){
+	includes = ['application.properties', 'gradle.properties']
+}
+
 task commitVersionUpdate(type: GitCommit) {
 	message = "Version Number ${version}"
 }
 
-task customRelease {
-	dependsOn tag, updateUploadedPom, uploadArchives, updateVersionNumber, commitVersionUpdate
+task qaRelease {
+	dependsOn updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate
+}
+
+task release {
+	dependsOn tag, qaRelease
 }
 
 //Task Dependencies
-//updateUploadedPom.dependsOn updateBuildNumber
-createReleaseTag.dependsOn uploadArchives
-//uploadArchives.dependsOn updateUploadedPom
-
 updateUploadedPom.mustRunAfter tag
 uploadArchives.mustRunAfter updateUploadedPom
 updateVersionNumber.mustRunAfter uploadArchives
-commitVersionUpdate.mustRunAfter updateVersionNumber
+addVersionUpdate.mustRunAfter updateVersionNumber
+commitVersionUpdate.mustRunAfter addVersionUpdate
