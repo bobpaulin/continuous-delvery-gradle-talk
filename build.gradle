@@ -205,6 +205,10 @@ task tag(type: GitTag) {
 	message = "Release of ${version}"
 }
 
+task pushToRemote(type: GitPush){
+	pushAll = true
+}
+
 task addVersionUpdate(type: GitAdd){
 	includes = ['application.properties', 'gradle.properties']
 }
@@ -214,11 +218,11 @@ task commitVersionUpdate(type: GitCommit) {
 }
 
 task qaRelease {
-	dependsOn getBranchName, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate
+	dependsOn getBranchName, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
 }
 
 task release {
-	dependsOn tag, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate
+	dependsOn tag, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
 }
 
 //Task Dependencies
@@ -228,3 +232,4 @@ uploadArchives.mustRunAfter updateUploadedPom
 updateVersionNumber.mustRunAfter uploadArchives
 addVersionUpdate.mustRunAfter updateVersionNumber
 commitVersionUpdate.mustRunAfter addVersionUpdate
+pushToRemote.mustRunAfter commitVersionUpdate
