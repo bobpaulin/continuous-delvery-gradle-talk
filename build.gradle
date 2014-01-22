@@ -16,7 +16,7 @@ def userName = System.getProperty("user.name")
 def userPropsFile = project.file(userName + ".properties")
 def gradlePropsFile = project.file("gradle.properties")
 def grailsPropsFile = project.file("application.properties")
-def branchName = "";
+def branchName = ""
 
 //If user properties don't exist create it based on template.
 if(!userPropsFile.exists())
