@@ -1,0 +1,172 @@
+package com.bobpaulin.backend.web;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.repository.Query;
+
+import static org.springframework.data.mongodb.core.query.Query.query;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
+
+import com.bobpaulin.shared.data.BookPreferenceDataService;
+import com.bobpaulin.shared.data.MessageDataService;
+import com.bobpaulin.shared.data.UserDataService;
+import com.bobpaulin.shared.model.BookPreference;
+import com.bobpaulin.shared.model.Message;
+import com.bobpaulin.shared.model.User;
+import com.bobpaulin.shared.model.book.BookResponse;
+import com.bobpaulin.shared.model.book.VolumeItem;
+
+
+@Controller
+@RequestMapping("/main")    
+public class BackendController {
+    
+    @Autowired
+    private UserDataService userDataService;
+    
+    @Autowired
+    private MessageDataService messageDataService;
+    
+    @Autowired
+    private BookPreferenceDataService bookPreferenceDataService;
+    
+    @Autowired
+    private RestTemplate restTemplate;
+    
+    private Map<String, Object> keywordCache;
+    
+    private Map<String, Object> bookCache;
+    
+    public BackendController() {
+		keywordCache = new HashMap<String, Object>();
+		bookCache = new HashMap<String, Object>();
+	}
+    
+    @RequestMapping(value = {"","/"}, method = RequestMethod.GET)
+    public String index(@CookieValue(defaultValue="bpaulin", value="userName" ) String userName, Model model)
+    {
+        List<VolumeItem> bookResults = new ArrayList<VolumeItem>();
+        User user = userDataService.getUser(userName);
+        List<BookPreference> bookPreferences = bookPreferenceDataService.getUserBookPreferences(userName);
+        if(bookPreferences != null)
+        {
+            for(BookPreference currentPreference: bookPreferences)
+            {
+            	BookResponse searchResults = getBookResponse(currentPreference);
+                
+                if(searchResults.getItems() != null)
+                {
+                    bookResults.addAll(searchResults.getItems());
+                }
+            }
+            
+        }
+        
+        BookPreference command = new BookPreference();
+        command.setUserName(userName);
+        model.addAttribute("command", command);
+        model.addAttribute("bookPreferences", bookPreferences);
+        model.addAttribute("user", user);
+        model.addAttribute("bookResults", bookResults);
+        
+        
+        return "main";
+    }
+
+	private BookResponse getBookResponse(BookPreference currentPreference) {
+		BookResponse searchResults;
+		if(keywordCache.containsKey(currentPreference.getKeyword()))
+		{
+			searchResults = (BookResponse)keywordCache.get(currentPreference.getKeyword());
+		}else
+		{
+			Map<String, String> vars = new HashMap<String, String>();
+		    vars.put("query", currentPreference.getKeyword());
+		    vars.put("booksMaxResults", Integer.getInteger("booksMaxResults", 2).toString());
+		    searchResults = restTemplate.getForObject("https://www.googleapis.com/books/v1/volumes?q={query}&country=US&maxResults={booksMaxResults}", BookResponse.class, vars);
+		    keywordCache.put(currentPreference.getKeyword(), searchResults);
+		}
+		return searchResults;
+	}
+    
+    @RequestMapping(value = {"/review/{bookId}"}, method = RequestMethod.GET)
+    public String review(@CookieValue(defaultValue="bpaulin", value="userName" ) String userName, @PathVariable("bookId") String bookId, Model model)
+    {
+        User user = userDataService.getUser(userName);
+        List<Message> bookMessages = messageDataService.getBookMessages(bookId);
+        
+        VolumeItem bookData = getBookData(bookId);
+        
+        
+        Message message = new Message();
+        message.setUserName(userName);
+        message.setBookId(bookId);
+        
+        model.addAttribute("command", message);
+        model.addAttribute("user", user);
+        model.addAttribute("bookData", bookData);
+        model.addAttribute("messageList", bookMessages);
+        return "bookReview";
+    }
+
+	private VolumeItem getBookData(String bookId) {
+		VolumeItem bookData;
+		if(bookCache.containsKey(bookId))
+        {
+        	bookData = (VolumeItem)bookCache.get(bookId);
+        }else
+        {
+        	Map<String, String> vars = new HashMap<String, String>();
+            vars.put("bookId", bookId);
+            bookData = restTemplate.getForObject("https://www.googleapis.com/books/v1/volumes/{bookId}?country=US", VolumeItem.class, vars);
+            bookCache.put(bookId, bookData);
+        }
+		return bookData;
+	}
+    
+    
+    @RequestMapping(value= {"/createUser"}, method = RequestMethod.POST)
+    public String createUser(@RequestParam("userName") String userName, @RequestParam("firstName") String firstName, @RequestParam("lastName") String lastName )
+    {
+        User user = new User();
+        user.setUserName(userName);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        userDataService.save(user);
+        return "main";
+    }
+    
+    @RequestMapping(value= { "/createMessage"}, method= RequestMethod.POST)
+    public String createMessage(@ModelAttribute("newMessage")
+    Message newMessage, BindingResult result)
+    {
+        
+        newMessage.setPostDate(new Date());
+        messageDataService.save(newMessage);
+        return "redirect:review/" + newMessage.getBookId();
+    }
+    
+    @RequestMapping(value= { "/createBookPreference"}, method= RequestMethod.POST)
+    public String createBookPreference(@ModelAttribute("newPreference")
+    BookPreference newBookPreference, BindingResult result)
+    {
+        bookPreferenceDataService.save(newBookPreference);
+        return "redirect:/main";
+    }
+}
