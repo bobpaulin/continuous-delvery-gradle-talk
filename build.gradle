@@ -22,7 +22,7 @@ if(!userPropsFile.exists())
 def userProperties = new Properties()
 def userFileReader = new FileReader(userPropsFile)
 userProperties.load(userFileReader)
-userFileReader.close()
+userFileReader.close()	
 
 //Load user properties
 for(currentUserProperty in userProperties.stringPropertyNames())
@@ -31,6 +31,8 @@ for(currentUserProperty in userProperties.stringPropertyNames())
 }
 
 //Configurations
+project.ext.set('env', hasProperty('env') ? env : 'dev')
+
 buildscript {
 	repositories {
 		maven { url "https://oss.sonatype.org/content/groups/public"}
@@ -46,7 +48,7 @@ buildscript {
 
 cargo {
 	containerId = 'tomcat7x'
-	port = Integer.parseInt("$deployPort")
+	port = Integer.parseInt(getProperty(project.env + ".deployPort"))
 
 	deployable {
 		context = artifactId
@@ -54,9 +56,9 @@ cargo {
 	}
 	
 	remote {
-		hostname = "$deployHostname"
-		username = "$deployUserName"
-		password = "$deployPassword"
+		hostname = getProperty(project.env + ".deployHostname")
+		username = getProperty(project.env + ".deployUserName")
+		password = getProperty(project.env + ".deployPassword")
 	}
 	
 }
