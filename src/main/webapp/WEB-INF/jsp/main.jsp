@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <html lang="en">
 	<head>
@@ -48,6 +49,15 @@
 						<div class="row-fluid">
 							<div class="span12">
 							${volItem.volumeInfo.description }
+							</div>
+						</div>
+						<div class="row-fluid">
+							<div class="span3">
+								Rating Score
+							</div>
+							<div class="span9">
+								${volItem.volumeInfo.ratingsScore}
+						
 							</div>
 						</div>
 						<div class="row-fluid">
