@@ -49,7 +49,7 @@
 					<ul>
 						<li>Independent Consultant</li>
 						<li>Business Enablement</li>
-						<li>Web Centric</li>
+						<li>Web Centric Platforms</li>
 						<li>Automation</li>
 					</ul>
 					<aside class="notes">
@@ -66,12 +66,19 @@
 				<section>
 					<h2>Wait people actually do that?</h2>
 					<aside class="notes">
-						
+						Not including emergency bug fixes.  How often do you release code?
+						Every year?
+						Every month?
+						Every 2 weeks?
+						Every day?
 					</aside>
 				</section>
 				<section>
 					<h3>Etsy ~ 30 deploys a day</h3>
 					<h3>My Personal Record 5</h3>
+					<aside class="notes">
+						5 feature deployments not unplanned break fix.
+					</aside>
 				</section>
 				<section>
 					<h2>Benefits of Continuous Delivery</h2>
@@ -81,12 +88,15 @@
 						<li>Do more concurrently</li>
 						<li>Delivery becomes a non-event</li>
 					</ul>
+					<aside class="notes">
+						Especially important in usability and new products.  Lean Agile.  Practice makes perfect.
+					</aside>
 				</section>
 				<section>
 					<h2>Delivering software can be painful!</h2>
 					<ul>
 						<li>Needs to be Assembled</li>
-						<li>Needs to be deployed</li>
+						<li>Needs to be Deployed</li>
 						<li>Needs to be Tested</li>
 						<li>How can I make sure I don't break existing stuff?</li>
 						<li>What happens if I do break something?</li>
@@ -94,6 +104,9 @@
 						<li>How do I know what changed?</li>
 						<li>How do I control what goes in and what does not?</li>
 					</ul>
+					<aside class="notes">
+						A lot of care goes into delivering quality software.  Continuous Delivery is not about skipping steps.
+					</aside>
 				</section>
 				<section>
 					<h2>All that's going to take me at least 2 weeks!</h2>
@@ -108,6 +121,9 @@
 						<li>Deployment Process</li>
 						<li>Rollback</li>
 					</ul>
+					<aside class="notes">
+						These are the bare requirements. Master these first before moving on.  
+					</aside>
 				</section>
 				<section>
 					<h2>Release Management 501</h2>
@@ -119,12 +135,18 @@
 						<li>Auto Provisioning</li>
 						<li>Auto-Scaling</li>
 					</ul>
+					<aside class="notes">
+						More advanced stuff.  Perhaps a later talk or review the etsy presentation linked at the end.
+					</aside>
 				</section>
 				<section>
 					<h2>Lets focus on just 101</h2>
 				</section>
 				<section>
 					<h2>Tools to the rescue!</h2>
+					<aside class="notes">
+						In most cases we do not invest the time we need to learn the tools required to do this.  
+					</aside>
 				</section>
 				<section>
 					<h2>Tools for Delivering software</h2>
@@ -140,6 +162,9 @@
 						<li>Merging</li>
 						<li>Permissions</li>
 					</ul>
+					<aside class="notes">
+						Almost all of us use this.  
+					</aside>
 				</section>
 				<section>
 					<h2>Build Tools</h2>
@@ -152,6 +177,10 @@
 						<li>Lifecycle Management</li>
 						<li>Versioning</li>
 					</ul>
+					<aside class="notes">
+						Most of us use this but we stop short.  How many folks check all thier files into thier project?  Use Dependency Management?
+						How many version thier software?  
+					</aside>
 				</section>
 				<section>
 					<h2>Binary Repository</h2>
@@ -162,6 +191,10 @@
 						<li>Search</li>
 						<li>Scale to hold a ton of binaries</li>
 					</ul>
+					<aside class="notes">
+						This is rarely used properly.  When done correctly this can be a huge boost when combine with dependency management and versioning.
+						How many host thier own binary repositories?
+					</aside>
 				</section>
 				<section>
 					<h2>A Recipe for Continuous Delivery</h2>
@@ -176,17 +209,24 @@
 					<ul>
 						<li>Build Tool</li>
 						<li>Groovy</li>
-						<li>Ant is a first class citizen</li>
+						<li>Ant tasks are a first class citizen</li>
 						<li>Plugins</li>
 					</ul>
+					<aside class="notes">
+						We'll dig into Gradle in a minute.  
+					</aside>
 				</section>
 				<section>
 					<h2>Artifactory</h2>
 					<ul>
 						<li>Binary Repository</li>
+						<li>JEE Web App</li>
 						<li>Supports Maven and Ivy</li>
-						<li>Open Source</li>
+						<li>Open Source and Pro Licensed</li>
 					</ul>
+					<aside class="notes">
+						JFrog.  Runs in tomcat.
+					</aside>
 				</section>
 				<section>
 					<h2>Git</h2>
@@ -195,6 +235,9 @@
 						<li>Distributed</li>
 						<li>Tagging/Branch/Merge</li>
 					</ul>
+					<aside class="notes">
+						Still more of an alpha geek tool.  You need to actually understand how it works. Needs more tooling.  Great for remote development.
+					</aside>
 				</section>
 				<section>
 					<h2>How does all this stuff work together?</h2>
@@ -203,11 +246,183 @@
 					<img src="images/BuildToolRecipe.jpg"/>
 				</section>
 				<section>
+					<h2>Lets look at some code!</h2>
+				</section>
+				<section>
+					<h2>Gradle Plugins</h2>
+					<ul>
+						<li>War Plugin</li>
+						<li>Cargo Plugin</li>
+						<li>Maven Plugin</li>
+					</ul>
+					<aside class="notes">
+						War Plugin adds build steps for creating a web archive.  Cargo is a plugin that allows you to work with several containers.  Maven allows the use of working with maven repos(Gradle uses Ivy by default).
+					</aside>
+				</section>
+				<section>
+					<section>
+						<h2>Gradle Configurations</h2>
+						<h3>Config + Code!</h3>
+						<aside class="notes">
+							Code creates User properties and loads it in.  Notice JSON style notation for config but I can also put executable code in there.  Inline expression language.  Power of using Groovy.
+						</aside>
+					</section>
+					<section>
+						<pre><code data-trim contenteditable>
+cargo {
+	containerId = 'tomcat7x'
+	port = Integer.parseInt(getProperty(project.env + ".deployPort"))
+
+	deployable {
+		context = artifactId
+		file = project.file(artifactDownloadPath)
+	}
+	
+	remote {
+		hostname = getProperty(project.env + ".deployHostname")
+		username = getProperty(project.env + ".deployUserName")
+		password = getProperty(project.env + ".deployPassword")
+	}
+	
+}
+						</code></pre>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Dependency Management</h2>
+						<h3>For your Application AND for your Build</h3>
+						<aside class="notes">
+							Dependencies don't only have scopes but can be used for build or app.  Can target specific config.
+						</aside>
+					</section>
+					<section>
+						<pre><code data-trim contenteditable>
+buildscript {
+	repositories {
+		maven { url "https://oss.sonatype.org/content/groups/public"}
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath   "javax.servlet:servlet-api:2.5",
+					"org.gradle.api.plugins:gradle-cargo-plugin:0.6.1",
+					"org.ajoberstar:gradle-git:0.6.3"
+	}
+}
+						</code></pre>
+					</section>
+					<section>
+						<pre><code data-trim contenteditable>
+dependencies {
+	def cargoVersion = '1.3.3'
+	def springVersion = '3.2.3.RELEASE'
+	def wro4JVersion = '1.6.3'
+	def aopAllainceVersion = '1.0'
+	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion", "org.codehaus.cargo:cargo-ant:$cargoVersion"
+	compile "org.springframework:spring-aop:$springVersion", "org.springframework:spring-beans:$springVersion", 
+	"org.springframework:spring-context:$springVersion","org.springframework:spring-context-support:$springVersion",
+	"org.springframework:spring-expression:$springVersion", "org.springframework:spring-tx:$springVersion",
+	"org.springframework:spring-web:$springVersion", "org.springframework:spring-webmvc:$springVersion", "org.mongodb:mongo-java-driver:2.9.1",
+	"javax.servlet:jstl:1.2","org.slf4j:slf4j-api:1.5.6", "org.slf4j:jcl-over-slf4j:1.5.6", "org.slf4j:slf4j-log4j12:1.5.6", "log4j:log4j:1.2.16",
+	"org.codehaus.jackson:jackson-mapper-asl:1.9.3","aopalliance:aopalliance:$aopAllainceVersion","log4j:log4j:1.2.9"
+	compile("org.springframework.data:spring-data-mongodb:1.0.4.RELEASE"){
+		exclude module: "slf4j-api"
+	}
+	compile("org.springframework:spring-core:$springVersion"){
+		exclude module: 'commons-logging'
+	}
+	compile ("ro.isdc.wro4j:wro4j-core:$wro4JVersion")
+	{
+		exclude module: "slf4j-api"
+	}
+  
+	compile("ro.isdc.wro4j:wro4j-extensions:$wro4JVersion")
+	{
+		exclude module: "slf4j-api"
+		exclude module: "slf4j-log4j12"
+	}
+	providedCompile "javax.el:el-api:1.0", "javax.servlet.jsp:jsp-api:2.0", "javax.servlet:servlet-api:2.5"
+	testCompile "junit:junit:3.8.1", "org.springframework:spring-test:$springVersion"
+
+}
+						</code></pre>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Gradle Tasks</h2>
+						<aside class="notes">
+							Lots of power here for configuring per a template or writing your own.	
+						</aside>
+					</section>
+					<section>
+						<pre><code data-trim contenteditable>
+task updateUploadedPom(dependsOn: 'getBranchName') << {
+	def pomVersion = project.version
+	if(!project.getGradle().getTaskGraph().hasTask(":release"))
+		pomVersion += ".$branchName"
+	uploadArchives.repositories.mavenDeployer.pom.version = pomVersion
+}
+						</code></pre>
+						<aside class="notes">
+							Simple custom task with a dependency.	
+						</aside>
+					</section>
+					<section>
+						<pre><code data-trim contenteditable>
+task tag(type: GitTag) {
+	tagName = version
+	message = "Release of ${version}"
+}
+
+task pushToRemote(type: GitPush){
+	pushAll = true
+}
+						</code></pre>
+						<aside class="notes">
+							Task types allow you to use prebuilt tasks and provide custom config	
+						</aside>
+					</section>
+					<section>
+						<pre><code data-trim contenteditable>
+task qaRelease {
+	dependsOn war, getBranchName, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
+}
+						</code></pre>
+						<aside class="notes">
+							Consolidate them together.  However doesn't guarantee order!	
+						</aside>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Gradle Task Dependencies</h2>
+					</section>
+					<section>
+						<pre><code data-trim contenteditable>
+//Task Dependencies
+tag.mustRunAfter war
+updateUploadedPom.mustRunAfter tag
+uploadArchives.mustRunAfter updateUploadedPom
+updateVersionNumber.mustRunAfter uploadArchives
+addVersionUpdate.mustRunAfter updateVersionNumber
+commitVersionUpdate.mustRunAfter addVersionUpdate
+pushToRemote.mustRunAfter commitVersionUpdate
+						</code></pre>
+						<aside class="notes">
+							Create loose rules around dependencies.  Also has should run after.  Concurrency.	
+						</aside>
+					</section>
+
+				</section>
+
+				<section>
 					<h2>Demo time!</h2>
 					<h3>A simple Book Review website</h3>
 				</section>
 				<section>
-					<h2>Adding Book Ratings to the site</h2>
+					<h2>Adding Book Ratings Score to the site</h2>
 				</section>
 				<section>
 					<h2>Creating a feature branch</h2>
@@ -243,32 +458,6 @@
 					<h2>Know your rollback strategy before every deployment</h2>
 				</section>
 				<section>
-					<h2>How does this stuff REALLY work?</h2>
-					<h3>Lets look at some code!</h3>
-				</section>
-				<section>
-					<h2>Gradle Plugins</h2>
-					<ul>
-						<li>War Plugin</li>
-						<li>Cargo Plugin</li>
-						<li>Maven Plugin</li>
-					</ul>
-				</section>
-				<section>
-					<h2>Gradle Configurations</h2>
-					<h3>Config + Code!</h3>
-				</section>
-				<section>
-					<h2>Dependency Management</h2>
-					<h3>For your Application AND for your Build</h3>
-				</section>
-				<section>
-					<h2>Gradle Tasks</h2>
-				</section>
-				<section>
-					<h2>Gradle Task Dependencies</h2>
-				</section>
-				<section>
 					<h2>Enterprise Architecture</h2>
 					<img src="images/EnterpriseArchitecture.jpg"/>
 				</section>
@@ -281,13 +470,14 @@
 						<h4>Code and Presentation</h4>
 						<a href="https://github.com/bobpaulin/continuous-delvery-gradle-talk">Continuous Delivery with Gradle in 30 Minutes</a>
 					</div>
+					<br/>
 						<ul>
 							<li><a href="http://gradle.org/">Gradle</a></li>
 							<li><a href="https://github.com/townsfolk/gradle-release">Gradle Release Plugin</a></li>
-							<li><a href="http://grails.org/">Grails</a></li>
-							<li><a href="https://github.com/grails/grails-gradle-plugin">Grails Gradle Plugin</a></li>
 							<li><a href="http://git-scm.com">Git</a></li>
 							<li><a href="http://www.jfrog.com/home/v_artifactory_opensource_overview">Artifactory</a></li>
+							<li><a href="http://cargo.codehaus.org/">Cargo</a></li>
+							<li><a href="http://www.slideshare.net/mikebrittain/continuous-delivery-the-dirty-details">Etsy's Mike Brittain "Continuous Delivery: The Dirty Details"</a></li>
 						</ul>
 				</section>
 				<section>

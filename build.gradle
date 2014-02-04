@@ -76,7 +76,7 @@ dependencies {
 	def wro4JVersion = '1.6.3'
 	def aopAllainceVersion = '1.0'
 	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion", "org.codehaus.cargo:cargo-ant:$cargoVersion"
-	compile "javax.servlet:servlet-api:2.5", "org.springframework:spring-aop:$springVersion", "org.springframework:spring-beans:$springVersion", 
+	compile "org.springframework:spring-aop:$springVersion", "org.springframework:spring-beans:$springVersion", 
 	"org.springframework:spring-context:$springVersion","org.springframework:spring-context-support:$springVersion",
 	"org.springframework:spring-expression:$springVersion", "org.springframework:spring-tx:$springVersion",
 	"org.springframework:spring-web:$springVersion", "org.springframework:spring-webmvc:$springVersion", "org.mongodb:mongo-java-driver:2.9.1",
@@ -98,7 +98,7 @@ dependencies {
 		exclude module: "slf4j-api"
 		exclude module: "slf4j-log4j12"
 	}
-	providedCompile "javax.el:el-api:1.0", "javax.servlet.jsp:jsp-api:2.0"
+	providedCompile "javax.el:el-api:1.0", "javax.servlet.jsp:jsp-api:2.0", "javax.servlet:servlet-api:2.5"
 	testCompile "junit:junit:3.8.1", "org.springframework:spring-test:$springVersion"
 
 }
@@ -115,21 +115,12 @@ uploadArchives {
 	}
 }
 
-task downloadWar << {
+task downloadWar(dependsOn: 'getBranchName') << {
 	
 	def groupPath = project.group.replace(".", "/")
 	def defaultVersion = project.version + ".$branchName"
-	def versionPath
-	def versionMessage = "Enter Version: [$defaultVersion]"
-	if(System.console())
-	{
-		versionPath = System.console().readLine(versionMessage) ?: defaultVersion
-	}
-	else
-	{
-		println versionMessage
-		versionPath = System.in.newReader().readLine() ?: defaultVersion
-	}
+	
+	def versionPath = promptForVersion("Enter Version: [$defaultVersion]", defaultVersion)
 	
 	def artifactNamePath = artifactId + "-" + versionPath + ".war"
 	
@@ -146,7 +137,7 @@ task downloadWar << {
 	
 }
 
-task updateUploadedPom << {
+task updateUploadedPom(dependsOn: 'getBranchName') << {
 	def pomVersion = project.version
 	if(!project.getGradle().getTaskGraph().hasTask(":release"))
 		pomVersion += ".$branchName"
@@ -156,7 +147,7 @@ task updateUploadedPom << {
 task updateVersionNumber << {
 	def oldVersion = "${project.version}"
 	
-	def versionPath
+	
 	//Increment Version Number
 	def oldVersionArray = oldVersion.split("\\.")
 	def majorVersion = oldVersionArray[0]
@@ -164,17 +155,7 @@ task updateVersionNumber << {
 	def patchVersion = Integer.parseInt(oldVersionArray[2]) + 1
 	def defaultVersion =  "$majorVersion.$minorVersion.$patchVersion"
 	
-	def versionMessage = "Enter Version: [$defaultVersion]"
-	if(System.console())
-	{
-		versionPath = System.console().readLine(versionMessage) ?: defaultVersion
-	}
-	else
-	{
-		println versionMessage
-		versionPath = System.in.newReader().readLine() ?: defaultVersion
-	}
-	
+	def versionPath = promptForVersion("Enter Version: [$defaultVersion]", defaultVersion)
 	
 	try {
 		project.ant.replace(file: gradlePropsFile, token: "version=${oldVersion}", value: "version=${versionPath}", failOnNoReplacements: true)
@@ -207,20 +188,31 @@ task commitVersionUpdate(type: GitCommit) {
 }
 
 task qaRelease {
-	dependsOn clean, war, getBranchName, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
+	dependsOn war, getBranchName, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
 }
 
 task release {
-	dependsOn clean, war, tag, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
+	dependsOn war, tag, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
 }
 
 //Task Dependencies
-war.mustRunAfter clean
-getBranchName.mustRunAfter war
-updateUploadedPom.mustRunAfter getBranchName
+tag.mustRunAfter war
 updateUploadedPom.mustRunAfter tag
 uploadArchives.mustRunAfter updateUploadedPom
 updateVersionNumber.mustRunAfter uploadArchives
 addVersionUpdate.mustRunAfter updateVersionNumber
 commitVersionUpdate.mustRunAfter addVersionUpdate
 pushToRemote.mustRunAfter commitVersionUpdate
+
+//Helper functions
+def promptForVersion(versionMessage, defaultVersion){
+	if(System.console())
+	{
+		return System.console().readLine(versionMessage) ?: defaultVersion
+	}
+	else
+	{
+		println versionMessage
+		return System.in.newReader().readLine() ?: defaultVersion
+	}
+}
