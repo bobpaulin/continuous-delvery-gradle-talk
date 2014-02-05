@@ -209,7 +209,8 @@
 					<ul>
 						<li>Build Tool</li>
 						<li>Groovy</li>
-						<li>Ant tasks are a first class citizen</li>
+						<li>Combines some of the best features of Ant and Maven</li>
+						<li>Conventions optional</li>
 						<li>Plugins</li>
 					</ul>
 					<aside class="notes">
@@ -236,7 +237,7 @@
 						<li>Tagging/Branch/Merge</li>
 					</ul>
 					<aside class="notes">
-						Still more of an alpha geek tool.  You need to actually understand how it works. Needs more tooling.  Great for remote development.
+						Still more of an alpha geek tool.  You need to actually understand how it works. Needs more tooling.  Great for concurrent/remote development. Continuously delivery lots of merges.
 					</aside>
 				</section>
 				<section>
@@ -421,11 +422,14 @@ pushToRemote.mustRunAfter commitVersionUpdate
 					<section>
 						<h2>Demo time!</h2>
 						<h3>A simple Book Review website</h3>
+						<aside class="notes">
+							show http://gradle.bobpaulin.com/continuous-delvery-gradle-talk/main		
+						</aside>
 					</section>
 					<section>
 						<h2>Adding Book Ratings Score to the site</h2>
 						<aside class="notes">
-								
+							average rating * count = score		
 						</aside>
 					</section>
 					<section>
@@ -434,7 +438,13 @@ pushToRemote.mustRunAfter commitVersionUpdate
 					<section>
 						<h2>Write the code... We already know how to do this!</h2>
 						<aside class="notes">
-							Create loose rules around dependencies.  Also has should run after.  Concurrency.	
+													<pre><code data-trim contenteditable>
+VolumeInfo.java
+private String averageRating;private String ratingsCount;
+public Double getRatingsScore(){return Double.parseDouble(this.ratingsCount) * Double.parseDouble(this.averageRating);}
+    	
+main.jsp<div class="row-fluid"><div class="span3">Rating Score</div><div class="span9">${volItem.volumeInfo.ratingsScore}</div> </div>
+						</code></pre>	
 						</aside>
 					</section>
 					<section>
