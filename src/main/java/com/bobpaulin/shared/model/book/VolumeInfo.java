@@ -14,13 +14,33 @@ public class VolumeInfo {
     
     private String previewLink;
     
+    private String ratingsCount;
+    
+    private String averageRating;
+    
     private ImageLinks imageLinks;
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public String getRatingsCount() {
+		return ratingsCount;
+	}
+
+	public void setRatingsCount(String ratingsCount) {
+		this.ratingsCount = ratingsCount;
+	}
+
+	public String getAverageRating() {
+		return averageRating;
+	}
+
+	public void setAverageRating(String averageRating) {
+		this.averageRating = averageRating;
+	}
+
+	public void setTitle(String title) {
         this.title = title;
     }
 
@@ -62,5 +82,10 @@ public class VolumeInfo {
     
     public void setImageLinks(ImageLinks imageLinks) {
         this.imageLinks = imageLinks;
+    }
+    
+    public Double getRatingsScore()
+    {
+    	return Double.parseDouble(this.ratingsCount) * Double.parseDouble(this.averageRating);
     }
 }

@@ -51,6 +51,14 @@
 							</div>
 						</div>
 						<div class="row-fluid">
+							<div class="span3">
+								Ratings Score
+							</div>
+							<div class="span9">
+								${volItem.volumeInfo.ratingsScore}
+							</div>
+						</div>
+						<div class="row-fluid">
 							<div class="span12">
 							<a href="main/review/${volItem.id }">See Reviews</a>
 							</div>
