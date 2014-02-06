@@ -74,7 +74,8 @@
 					</aside>
 				</section>
 				<section>
-					<h3>Etsy ~ 30 deploys a day</h3>
+					<h2>Several Major Ecommerce Shops</h2>
+					<h3>Etsy.com Deploys about 30 times each day</h3>
 					<h3>My Personal Record 5</h3>
 					<aside class="notes">
 						5 feature deployments not unplanned break fix.
@@ -105,6 +106,7 @@
 						<li>How do I control what goes in and what does not?</li>
 					</ul>
 					<aside class="notes">
+						We're on a call for 2 hours and then this happens!  Deploy broken code.
 						A lot of care goes into delivering quality software.  Continuous Delivery is not about skipping steps.
 					</aside>
 				</section>
@@ -130,7 +132,7 @@
 					<ul>
 						<li>Config Switches</li>
 						<li>Feature Branching</li>
-						<li>Modular Design</li>
+						<li>Modular Deployment</li>
 						<li>Throttling</li>
 						<li>Auto Provisioning</li>
 						<li>Auto-Scaling</li>
@@ -140,30 +142,9 @@
 					</aside>
 				</section>
 				<section>
-					<h2>Lets focus on just 101</h2>
-				</section>
-				<section>
 					<h2>Tools to the rescue!</h2>
 					<aside class="notes">
-						In most cases we do not invest the time we need to learn the tools required to do this.  
-					</aside>
-				</section>
-				<section>
-					<h2>Tools for Delivering software</h2>
-					<img src="images/BuildTool.jpg"/>
-				</section>
-				<section>
-					<h2>Source Control</h2>
-				</section>
-				<section>
-					<ul>
-						<li>Store History/Traceability</li>
-						<li>Allow copying/branching</li>
-						<li>Merging</li>
-						<li>Permissions</li>
-					</ul>
-					<aside class="notes">
-						Almost all of us use this.  
+						In most cases we do not invest the time we need to learn the tools required to do this well and we waste small amounts of time frequently.  It adds up.  
 					</aside>
 				</section>
 				<section>
@@ -183,20 +164,6 @@
 					</aside>
 				</section>
 				<section>
-					<h2>Binary Repository</h2>
-				</section>
-				<section>
-					<ul>
-						<li>Support Versioning</li>
-						<li>Search</li>
-						<li>Scale to hold a ton of binaries</li>
-					</ul>
-					<aside class="notes">
-						This is rarely used properly.  When done correctly this can be a huge boost when combine with dependency management and versioning.
-						How many host thier own binary repositories?
-					</aside>
-				</section>
-				<section>
 					<h2>A Recipe for Continuous Delivery</h2>
 					<uL>
 						<li>Gradle</li>
@@ -210,7 +177,7 @@
 						<li>Build Tool</li>
 						<li>Groovy</li>
 						<li>Combines some of the best features of Ant and Maven</li>
-						<li>Conventions optional</li>
+						<li>Conventions</li>
 						<li>Plugins</li>
 					</ul>
 					<aside class="notes">
@@ -244,7 +211,16 @@
 					<h2>How does all this stuff work together?</h2>
 				</section>
 				<section>
+					<h2>Steps</h2>
+					<img src="images/CDProcess.jpg"/>
+				</section>
+				<section>
+					<h2>System Interaction</h2>
 					<img src="images/BuildToolRecipe.jpg"/>
+				</section>
+				<section>
+					<h2>A Brief Aside on Semantic Versioning</h2>
+					<img src="images/Versioning.jpg"/>
 				</section>
 				<section>
 					<h2>Lets look at some code!</h2>
@@ -287,6 +263,10 @@ cargo {
 	
 }
 						</code></pre>
+					</section>
+					<section>
+						<h2>Don't embed environmental information into the build script!</h2>
+						<h3>Create a user properties file instead.</h3>
 					</section>
 				</section>
 				<section>
@@ -388,7 +368,7 @@ task pushToRemote(type: GitPush){
 					<section>
 						<pre><code data-trim contenteditable>
 task qaRelease {
-	dependsOn war, getBranchName, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
+	dependsOn test, war, getBranchName, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
 }
 						</code></pre>
 						<aside class="notes">
@@ -403,6 +383,7 @@ task qaRelease {
 					<section>
 						<pre><code data-trim contenteditable>
 //Task Dependencies
+war.mustRunAfter test
 tag.mustRunAfter war
 updateUploadedPom.mustRunAfter tag
 uploadArchives.mustRunAfter updateUploadedPom
@@ -495,6 +476,7 @@ main.jsp<div class="row-fluid"><div class="span3">Rating Score</div><div class="
 							<li><a href="http://git-scm.com">Git</a></li>
 							<li><a href="http://www.jfrog.com/home/v_artifactory_opensource_overview">Artifactory</a></li>
 							<li><a href="http://cargo.codehaus.org/">Cargo</a></li>
+							<li><a href="http://semver.org/">Semantic Versioning</a></li>
 							<li><a href="http://www.slideshare.net/mikebrittain/continuous-delivery-the-dirty-details">Etsy's Mike Brittain "Continuous Delivery: The Dirty Details"</a></li>
 						</ul>
 				</section>

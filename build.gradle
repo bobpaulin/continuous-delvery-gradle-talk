@@ -92,7 +92,6 @@ dependencies {
 	{
 		exclude module: "slf4j-api"
 	}
-  
 	compile("ro.isdc.wro4j:wro4j-extensions:$wro4JVersion")
 	{
 		exclude module: "slf4j-api"
