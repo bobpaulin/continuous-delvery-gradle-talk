@@ -4,13 +4,13 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <html lang="en">
 	<head>
-		<title>Backend Home Page</title>
+		<title>Continuous Delivery Home Page</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link href="${contextPath}/wro/vendor.css" rel="stylesheet" />
 	</head>
 	<body>
 		<%@include file="/WEB-INF/jsp/navigation.jspf" %>
-		<h1>Welcome to the Backend Page</h1>
+		<h1>Welcome to the Continuous Delivery Page</h1>
 		<div class="container-fluid">
 			<div id="preferenceContainer">
 				<div class="row-fluid">
