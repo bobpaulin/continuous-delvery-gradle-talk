@@ -92,14 +92,13 @@ dependencies {
 	{
 		exclude module: "slf4j-api"
 	}
-  
 	compile("ro.isdc.wro4j:wro4j-extensions:$wro4JVersion")
 	{
 		exclude module: "slf4j-api"
 		exclude module: "slf4j-log4j12"
 	}
 	providedCompile "javax.el:el-api:1.0", "javax.servlet.jsp:jsp-api:2.0", "javax.servlet:servlet-api:2.5"
-	testCompile "junit:junit:3.8.1", "org.springframework:spring-test:$springVersion"
+	testCompile "junit:junit:4.11", "org.springframework:spring-test:$springVersion"
 
 }
 
@@ -188,14 +187,15 @@ task commitVersionUpdate(type: GitCommit) {
 }
 
 task qaRelease {
-	dependsOn war, getBranchName, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
+	dependsOn test, war, getBranchName, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
 }
 
 task release {
-	dependsOn war, tag, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
+	dependsOn test, war, tag, updateUploadedPom, uploadArchives, updateVersionNumber, addVersionUpdate, commitVersionUpdate, pushToRemote
 }
 
 //Task Dependencies
+war.mustRunAfter test
 tag.mustRunAfter war
 updateUploadedPom.mustRunAfter tag
 uploadArchives.mustRunAfter updateUploadedPom
