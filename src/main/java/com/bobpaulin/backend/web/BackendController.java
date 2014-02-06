@@ -169,4 +169,17 @@ public class BackendController {
         bookPreferenceDataService.save(newBookPreference);
         return "redirect:/main";
     }
+    
+    public void setBookPreferenceDataService(
+			BookPreferenceDataService bookPreferenceDataService) {
+		this.bookPreferenceDataService = bookPreferenceDataService;
+	}
+    
+    public void setMessageDataService(MessageDataService messageDataService) {
+		this.messageDataService = messageDataService;
+	}
+    
+    public void setUserDataService(UserDataService userDataService) {
+		this.userDataService = userDataService;
+	}
 }
