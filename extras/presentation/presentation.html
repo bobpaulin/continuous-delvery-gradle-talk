@@ -37,9 +37,9 @@
 				<section>
 					<h1>Continuous Delivery with Gradle</h1>
 					<h3>in 30 minutes</h3>
-					<p>
-						<small>Created by <a href="http://bobpaulin.com">Bob Paulin</a> / <a href="http://twitter.com/bobpaulin">@bobpaulin</a> / <a href="mailto:bob@bobpaulin.com">bob@bobpaulin.com</a></small>
-					</p>
+					</br>
+					<h4><a href="http://bobpaulin.com">Bob Paulin</a> / <a href="http://twitter.com/bobpaulin">@bobpaulin</a> / <a href="mailto:bob@bobpaulin.com">bob@bobpaulin.com</a></h4>
+					
 					<aside class="notes">
 						Don't forget to add notes. You can see them if you open the speaker notes window (hit 's' on your keyboard).
 					</aside>
@@ -208,19 +208,20 @@
 					</aside>
 				</section>
 				<section>
-					<h2>How does all this stuff work together?</h2>
+					<h2>How does all this stuff work</h2>
+					<h2>together?</h2>
 				</section>
 				<section>
 					<h2>Steps</h2>
-					<img src="images/CDProcess.jpg"/>
+					<img src="images/CDProcess.jpg" alt=""/>
 				</section>
 				<section>
 					<h2>System Interaction</h2>
-					<img src="images/BuildToolRecipe.jpg"/>
+					<img src="images/BuildToolRecipe.jpg" alt=""/>
 				</section>
 				<section>
 					<h2>A Brief Aside on Semantic Versioning</h2>
-					<img src="images/Versioning.jpg"/>
+					<img src="images/Versioning.jpg" alt=""/>
 				</section>
 				<section>
 					<h2>Lets look at some code!</h2>
@@ -265,7 +266,7 @@ cargo {
 						</code></pre>
 					</section>
 					<section>
-						<h2>Don't embed environmental information into the build script!</h2>
+						<h2>Don't embed environment data into the build script!</h2>
 						<h3>Create a user properties file instead.</h3>
 					</section>
 				</section>
@@ -339,7 +340,7 @@ dependencies {
 					</section>
 					<section>
 						<pre><code data-trim contenteditable>
-task updateUploadedPom(dependsOn: 'getBranchName') << {
+task updateUploadedPom(dependsOn: 'getBranchName') &lt;&lt; {
 	def pomVersion = project.version
 	if(!project.getGradle().getTaskGraph().hasTask(":release"))
 		pomVersion += ".$branchName"
@@ -419,13 +420,7 @@ pushToRemote.mustRunAfter commitVersionUpdate
 					<section>
 						<h2>Write the code... We already know how to do this!</h2>
 						<aside class="notes">
-													<pre><code data-trim contenteditable>
-VolumeInfo.java
-private String averageRating;private String ratingsCount;
-public Double getRatingsScore(){return Double.parseDouble(this.ratingsCount) * Double.parseDouble(this.averageRating);}
-    	
-main.jsp<div class="row-fluid"><div class="span3">Rating Score</div><div class="span9">${volItem.volumeInfo.ratingsScore}</div> </div>
-						</code></pre>	
+													
 						</aside>
 					</section>
 					<section>
@@ -458,7 +453,7 @@ main.jsp<div class="row-fluid"><div class="span3">Rating Score</div><div class="
 				</section>
 				<section>
 					<h2>Enterprise Architecture</h2>
-					<img src="images/EnterpriseArchitecture.jpg"/>
+					<img src="images/EnterpriseArchitecture.jpg" alt=""/>
 				</section>
 				<section>
 					<h2>Some parting thoughts on Gradle and Continous Delivery</h2>
@@ -471,13 +466,13 @@ main.jsp<div class="row-fluid"><div class="span3">Rating Score</div><div class="
 					</div>
 					<br/>
 						<ul>
-							<li><a href="http://gradle.org/">Gradle</a></li>
-							<li><a href="https://github.com/townsfolk/gradle-release">Gradle Release Plugin</a></li>
-							<li><a href="http://git-scm.com">Git</a></li>
-							<li><a href="http://www.jfrog.com/home/v_artifactory_opensource_overview">Artifactory</a></li>
-							<li><a href="http://cargo.codehaus.org/">Cargo</a></li>
-							<li><a href="http://semver.org/">Semantic Versioning</a></li>
-							<li><a href="http://www.slideshare.net/mikebrittain/continuous-delivery-the-dirty-details">Etsy's Mike Brittain "Continuous Delivery: The Dirty Details"</a></li>
+							<li><h4><a href="http://gradle.org/">Gradle</a></h4></li>
+							<li><h4><a href="https://github.com/townsfolk/gradle-release">Gradle Release Plugin</a></h4></li>
+							<li><h4><a href="http://git-scm.com">Git</a></h4></li>
+							<li><h4><a href="http://www.jfrog.com/home/v_artifactory_opensource_overview">Artifactory</a></h4></li>
+							<li><h4><a href="http://cargo.codehaus.org/">Cargo</a></h4></li>
+							<li><h4><a href="http://semver.org/">Semantic Versioning</a></h4></li>
+							<li><h4><a href="http://www.slideshare.net/mikebrittain/continuous-delivery-the-dirty-details">Etsy's Mike Brittain "Continuous Delivery: The Dirty Details"</a></h4></li>
 						</ul>
 				</section>
 				<section>
